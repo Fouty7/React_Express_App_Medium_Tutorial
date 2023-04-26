@@ -1,0 +1,118 @@
+Resources:
+  FrontendBucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: my-frontend-bucket-524059143420
+
+  BackendApplication:
+    Type: 'AWS::ElasticBeanstalk::Application'
+    Properties:
+      Description: My Elastic Beanstalk application
+      ApplicationName: my-backend-app    
+
+  BackendEnvironment:
+    Type: 'AWS::ElasticBeanstalk::Environment'
+    Properties:
+      ApplicationName: !Sub '${BackendApplication}'
+      SolutionStackName: "64bit Amazon Linux 2 v5.8.0 running Node.js 18"
+      EnvironmentName: my-backend-environment
+      OptionSettings:
+        - Namespace: aws:autoscaling:launchconfiguration
+          OptionName: IamInstanceProfile
+          Value: !Ref EBInstanceProfile
+          OptionName: InstanceType
+          Value: t2.micro
+
+  ElasticBeanstalkRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: ElasticBeanstalkRole
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: 
+              - elasticbeanstalk.amazonaws.com
+              - lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Path: '/'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/AWSElasticBeanstalkWebTier'
+        - 'arn:aws:iam::aws:policy/AWSElasticBeanstalkMulticontainerDocker'
+        - 'arn:aws:iam::aws:policy/AmazonS3FullAccess'
+
+  EBInstanceProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      InstanceProfileName: EBInstanceProfile
+      Roles:
+        - !Ref ElasticBeanstalkRole      
+
+  ApiGateway:
+    Type: 'AWS::ApiGateway::RestApi'
+    Properties:
+      Name: my-api-gateway
+
+  LambdaFunction:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      FunctionName: my-lambda-function
+      Handler: index.handler
+      Role: !GetAtt ElasticBeanstalkRole.Arn
+      Code:
+        ZipFile: |
+          const https = require('https');
+          exports.handler = async (event) => {
+              const options = {
+                  hostname: '${BackendEnvironment.EndpointURL}',
+                  path: event.path,
+                  method: event.httpMethod,
+                  headers: event.headers,
+              };
+              const response = await new Promise((resolve, reject) => {
+                  const req = https.request(options, (res) => {
+                      let body = '';
+                      res.on('data', (chunk) => (body += chunk));
+                      res.on('end', () => {
+                          const result = {
+                              statusCode: res.statusCode,
+                              body: body,
+                              headers: res.headers,
+                          };
+                          resolve(result);
+                      });
+                  });
+                  req.on('error', (err) => reject(err));
+                  req.write(event.body);
+                  req.end();
+              });
+              return response;
+          };
+      Runtime: nodejs14.x
+      Timeout: 3
+
+  ProxyResource:
+    Type: 'AWS::ApiGateway::Resource'
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ParentId: !GetAtt ApiGateway.RootResourceId
+      PathPart: '{proxy+}'
+
+  ProxyMethod:
+    Type: 'AWS::ApiGateway::Method'
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref ProxyResource
+      HttpMethod: ANY
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunction.Arn}/invocations'
+        
+Outputs:
+  FrontendBucketUrl:
+    Value: !Sub 'http://${FrontendBucket}.s3-website.${AWS::Region}.amazonaws.com'
+
+  BackendEnvironmentUrl:
+    Value: !Sub 'http://${BackendEnvironment}.elasticbeanstalk.com'       
