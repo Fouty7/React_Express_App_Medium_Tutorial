@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import logo from "./logo.svg";
 import "./App.css";
 
+require('dotenv').config();
+
 class App extends Component {
     constructor(props) {
         super(props);
@@ -9,11 +11,25 @@ class App extends Component {
     }
 
     callAPI() {
+        const apiUrl= process.env.REACT_APP_API_URL;
+        if (!apiUrl) {
+            throw new Error("API_URL environment variable is not set.");
+        }
+        fetch(apiUrl)
+            .then(res => res.text())
+            .then(res => this.setState({ apiResponse: res }))
+            .catch(err => err);
+    }
+
+    /*    
+    callAPI() {
+        const apiUrl= process.env.REACT_APP_API_UR;
         fetch("http://localhost:9000/testAPI")
             .then(res => res.text())
             .then(res => this.setState({ apiResponse: res }))
             .catch(err => err);
     }
+    */
 
     componentDidMount() {
         this.callAPI();
