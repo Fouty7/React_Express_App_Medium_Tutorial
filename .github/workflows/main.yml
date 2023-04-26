@@ -46,7 +46,7 @@ jobs:
         cd api
         npm install
 
-    - name: Run build task
+    - name: Run backend start task
       run: |
         cd api
-        npm run build      
+        npm start -- --detach   
