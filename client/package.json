@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "dotenv": "^16.0.3",
     "eslint": "^7.32.0",
     "react": "^16.4.2",
     "react-dom": "^16.4.2",
@@ -10,13 +11,12 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "react-scripts build --no-minify --optimization.minimize=false",
     "test": "react-scripts test --env=jsdom",
     "lint": "eslint --ext .js,.html .",
     "eject": "react-scripts eject"
   },
   "devDependencies": {
-    "dotenv": "^16.0.3",
     "eslint-plugin-react": "^7.32.2"
   }
 }
