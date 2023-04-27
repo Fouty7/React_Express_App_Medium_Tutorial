@@ -28,8 +28,6 @@ jobs:
       run: |
         cd client
         npm install dotenv@latest
-        npm install webpack@latest babel-loader@latest babel-core@latest
-        npm install webpack@latest --save-dev
         npm run build
 
   test_frontend:
