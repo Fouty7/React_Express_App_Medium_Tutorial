@@ -22,6 +22,7 @@
     "plugins": [
         "react"
     ],
+    "formatter": "stylish",
     "rules": {
         "react/prop-types": "off",
         "comma-dangle": 0,
