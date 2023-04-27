@@ -1,6 +1,7 @@
+/* eslint-disable no-unused-vars */
+
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { it } from '@jest/globals';
 import App from './App';
 
 it('renders without crashing', () => {
