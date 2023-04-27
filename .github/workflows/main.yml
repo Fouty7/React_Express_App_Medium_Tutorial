@@ -74,4 +74,4 @@ jobs:
     - name: Run backend test
       run: |
         cd api
-        npm run test         
+        npm run test
