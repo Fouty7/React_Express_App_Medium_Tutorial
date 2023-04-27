@@ -29,7 +29,31 @@ jobs:
         cd client
         npm run build
 
-  build_backend:
+  test_frontend:
+    needs: [build_frontend]
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout source code
+      uses: actions/checkout@v2
+
+    - name: Setup Node.js environment
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14.x'
+
+    - name: Install dependencies
+      run: |
+        cd client
+        npm install
+
+    - name: Run frontend test
+      run: |
+        cd client
+        npm run test
+
+  test_backend:
+    needs: [build_frontend]
     runs-on: ubuntu-latest
 
     steps:
@@ -46,7 +70,7 @@ jobs:
         cd api
         npm install
 
-    - name: Run backend start task
+    - name: Run backend test
       run: |
         cd api
-        npm start -- --detach   
+        npm run test         
