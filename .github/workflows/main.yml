@@ -50,6 +50,7 @@ jobs:
     - name: Run frontend test
       run: |
         cd client
+        export REACT_APP_API_URL='http://localhost:9000/testAPI'
         npm run test
 
   test_backend:
