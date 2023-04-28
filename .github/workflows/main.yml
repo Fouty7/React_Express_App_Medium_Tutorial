@@ -51,7 +51,8 @@ jobs:
     - name: Run frontend lint
       run: |
         cd client
-        npm install eslint --save-dev
+        npm install eslint
+         npm install eslint-plugin-react@latest
         npm run lint
 
   lint_backend:
@@ -75,7 +76,8 @@ jobs:
     - name: Run backend lint
       run: |
         cd client
-        npm install eslint --save-dev
+        npm install eslint
+         npm install eslint-plugin-react@latest
         npm run lint
 
   test_frontend:
