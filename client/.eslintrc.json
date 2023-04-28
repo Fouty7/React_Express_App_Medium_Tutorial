@@ -35,7 +35,7 @@
       },
       "settings": {
         "react": {
-          "version": "detect"
+          "version": "16.4.2"
         }
       }  
 }
