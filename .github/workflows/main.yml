@@ -146,4 +146,4 @@ jobs:
       uses: aws-actions/aws-cloudformation-github-deploy@v1
       with:
         name: s3-Bucket-stack
-        template-file: path/to/infrastructure/s3-infra.yml       
+        template: path/to/infrastructure/s3-infra.yml       
