@@ -1,0 +1,98 @@
+Resources:
+  FrontendBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: frontend-bucket-524059143420
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        IgnorePublicAcls: false
+        BlockPublicPolicy: false
+        RestrictPublicBuckets: false
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerPreferred
+      AccessControl: AwsExecRead
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: error.html
+      VersioningConfiguration:
+        Status: Suspended
+    DeletionPolicy: Retain    
+
+  BackendBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "elasticbeanstalk-${AWS::Region}-${AWS::AccountId}"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        IgnorePublicAcls: false
+        BlockPublicPolicy: false
+        RestrictPublicBuckets: true
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerPreferred
+      AccessControl: AwsExecRead
+      VersioningConfiguration:
+        Status: Suspended  
+
+  FrontendBucketPolicy:
+            Type: 'AWS::S3::BucketPolicy'
+            Properties:
+              Bucket:
+                Ref: 'FrontendBucket'
+              PolicyDocument:
+                Version: '2012-10-17'
+                Statement:
+                  - Effect: Allow
+                    Principal: '*'
+                    Action: 's3:GetObject'
+                    Resource:
+                      Fn::Join:
+                        - ''
+                        - - 'arn:aws:s3:::'
+                          - Ref: 'FrontendBucket'
+                          - '/*'        
+
+  BackendBucketPolicy:
+            Type: 'AWS::S3::BucketPolicy'
+            Properties:
+              Bucket:
+                Ref: 'BackendBucket'
+              PolicyDocument:
+                Version: '2012-10-17'
+                Statement:
+                  - Effect: Allow
+                    Principal: '*'
+                    Action: 's3:GetObject'
+                    Resource:
+                      Fn::Join:
+                        - ''
+                        - - 'arn:aws:s3:::'
+                          - Ref: 'BackendBucket'
+                          - '/*'
+                  - Sid: GrantElasticBeanstalkPutObject
+                    Effect: Allow
+                    Principal:
+                      Service: elasticbeanstalk.amazonaws.com
+                    Action: 's3:PutObject'
+                    Resource:
+                      Fn::Join:
+                        - ''
+                        - - 'arn:aws:s3:::'
+                          - Ref: 'BackendBucket'
+                          - '/*'         
+            
+Outputs:
+  WebsiteURL:
+    Value: !GetAtt 
+      - FrontendBucket
+      - WebsiteURL
+    Description: URL for website hosted on S3
+  S3BucketSecureURL:
+    Value: !Join 
+      - ''
+      - - 'https://'
+        - !GetAtt 
+          - FrontendBucket
+          - DomainName
+    Description: Name of S3 bucket to hold website content                          
