@@ -56,6 +56,7 @@ Resources:
 
   LambdaFunction:
     Type: 'AWS::Lambda::Function'
+    DependsOn: BackendEnvironment
     Properties:
       FunctionName: my-lambda-function
       Handler: index.handler
@@ -116,4 +117,6 @@ Outputs:
     Value: !Sub 'http://${FrontendBucket}.s3-website.${AWS::Region}.amazonaws.com'
 
   BackendEnvironmentUrl:
-    Value: !Sub 'http://${BackendEnvironment}.elasticbeanstalk.com'       
+    Value: !Sub 'http://${BackendEnvironment}.elasticbeanstalk.com'
+  BackendEnvironmentCname:
+    Value: !GetAtt BackendEnvironment.EndpointURL     
