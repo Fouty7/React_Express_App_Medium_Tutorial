@@ -145,5 +145,5 @@ jobs:
     - name: Deploy CloudFormation stack S3 Buckets
       uses: aws-actions/aws-cloudformation-github-deploy@v1
       with:
-        stack-name: s3-Bucket-stack
+        name: s3-Bucket-stack
         template-file: path/to/infrastructure/s3-infra.yml       
